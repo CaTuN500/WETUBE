@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WETUBE</title>
+    <link rel="icon" href="https://yaart-web-alice-images.s3.yandex.net/09e429d274ac11f1917836fb24177cc2:1">
+    <meta property="og:image" content="https://yaart-web-alice-images.s3.yandex.net/09e429d274ac11f1917836fb24177cc2:1">
+    <meta property="og:title" content="WETUBE">
+    <meta property="og:description" content="Видео платформа">
+    <meta name="twitter:card" content="summary_large_image">
     <style>
         :root {
             --accent: #439400;
@@ -19,6 +24,7 @@
         .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 200; display: flex; justify-content: center; align-items: center; }
         .login-overlay.hidden { display: none; }
         .login-box { background: var(--card); border-radius: 20px; padding: 32px 28px; width: 360px; text-align: center; }
+        .login-box img { width: 80px; height: 80px; border-radius: 16px; margin-bottom: 12px; }
         .login-box h2 { font-size: 26px; margin-bottom: 8px; font-weight: 900; }
         .login-box h2 .we { color: var(--accent); }
         .login-box h2 .tube { color: #fff; }
@@ -60,20 +66,17 @@
         .checkbox-label input { accent-color: var(--accent); width: auto; }
 
         .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
-        .shorts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
-        .section-title { grid-column: 1/-1; font-size: 15px; font-weight: bold; color: #fff; margin-top: 10px; }
         .video-card { background: var(--card); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: all 0.3s; }
-        .video-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        .video-card:hover { transform: translateY(-3px); }
         .video-card.ultra { border: 2px solid var(--ultra); box-shadow: 0 0 20px rgba(255,107,0,0.3); }
         .video-thumb { aspect-ratio: 16/9; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .video-thumb.short-thumb { aspect-ratio: 9/16; max-height: 400px; }
         .video-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .video-thumb .play-icon { position: absolute; font-size: 44px; opacity: 0.75; pointer-events: none; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+        .video-thumb .play-icon { position: absolute; font-size: 44px; opacity: 0.75; pointer-events: none; }
         .video-badge { position: absolute; top: 10px; left: 10px; padding: 3px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; }
         .badge-short { background: var(--accent); color: #fff; }
         .badge-ultra { background: var(--ultra); color: #fff; animation: pulse 1s infinite; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
-        .video-duration { position: absolute; bottom: 8px; right: 8px; padding: 2px 7px; border-radius: 4px; background: rgba(0,0,0,0.85); font-size: 11px; color: #fff; }
         .video-info { padding: 12px 14px; }
         .video-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; color: #ddd; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .video-meta { font-size: 12px; opacity: 0.7; display: flex; justify-content: space-between; align-items: center; }
@@ -99,7 +102,7 @@
         .comments-list::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
         .comment { padding: 10px 12px; background: var(--bg); border-radius: 10px; font-size: 13px; }
         .comment-author { font-weight: 600; font-size: 12px; color: var(--accent); margin-bottom: 4px; }
-        .comment-text { color: #ccc; line-height: 1.4; }
+        .comment-text { color: #ccc; }
         .comment-time { font-size: 10px; opacity: 0.5; margin-top: 4px; }
         .comment-input-row { display: flex; gap: 8px; }
         .comment-input-row input { flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid #555; background: var(--bg); color: #fff; font-size: 13px; outline: none; }
@@ -108,15 +111,19 @@
         .login-prompt { text-align: center; padding: 24px; font-size: 13px; opacity: 0.7; }
         .empty { text-align: center; padding: 60px; opacity: 0.5; grid-column: 1/-1; }
         .empty .icon { font-size: 64px; margin-bottom: 14px; }
-        @media (max-width: 850px) { .player-content { flex-direction: column; } .player-right { max-height: 35vh; min-width: auto; } .header { padding: 10px 14px; gap: 8px; } .header-right { gap: 6px; } .user-name { display: none; } }
+        .error-overlay { text-align: center; padding: 40px; }
+        .error-code { font-size: 72px; font-weight: 900; color: #ef4444; }
+        .error-text { font-size: 18px; color: #ccc; margin-top: 8px; }
+        @media (max-width: 850px) { .player-content { flex-direction: column; } .player-right { max-height: 35vh; min-width: auto; } .header { padding: 10px 14px; gap: 8px; } .user-name { display: none; } }
     </style>
 </head>
 <body>
 
 <div class="login-overlay" id="loginOverlay">
     <div class="login-box">
+        <img src="https://yaart-web-alice-images.s3.yandex.net/09e429d274ac11f1917836fb24177cc2:1" alt="WETUBE">
         <h2><span class="we">WE</span><span class="tube">TUBE</span></h2>
-        <div class="sub">Наша видео платформа</div>
+        <div class="sub">Видео платформа</div>
         <input type="text" id="loginName" placeholder="Имя пользователя">
         <input type="email" id="loginEmail" placeholder="Email (необязательно)">
         <input type="password" id="loginPass" placeholder="Пароль">
@@ -186,18 +193,7 @@
 
 <script>
 let db;
-function openDB() {
-    return new Promise((resolve, reject) => {
-        const req = indexedDB.open('wetube-final', 1);
-        req.onupgradeneeded = e => {
-            const d = e.target.result;
-            if (!d.objectStoreNames.contains('videos')) d.createObjectStore('videos', { keyPath: 'id' });
-            if (!d.objectStoreNames.contains('users')) d.createObjectStore('users', { keyPath: 'name' });
-        };
-        req.onsuccess = e => { db = e.target.result; resolve(db); };
-        req.onerror = reject;
-    });
-}
+function openDB() { return new Promise((resolve, reject) => { const req = indexedDB.open('wetube-v5', 1); req.onupgradeneeded = e => { const d = e.target.result; if (!d.objectStoreNames.contains('videos')) d.createObjectStore('videos', { keyPath: 'id' }); if (!d.objectStoreNames.contains('users')) d.createObjectStore('users', { keyPath: 'name' }); }; req.onsuccess = e => { db = e.target.result; resolve(db); }; req.onerror = reject; }); }
 async function saveVideoFull(v, blob) { const tx = db.transaction('videos','readwrite'); tx.objectStore('videos').put({...v, blob}); await new Promise(r => { tx.oncomplete = r; }); }
 async function getAllVideos() { const tx = db.transaction('videos','readonly'); const req = tx.objectStore('videos').getAll(); return new Promise(r => { req.onsuccess = () => r(req.result || []); }); }
 async function updateVideo(v) { const tx = db.transaction('videos','readwrite'); tx.objectStore('videos').put(v); await new Promise(r => { tx.oncomplete = r; }); }
@@ -209,74 +205,47 @@ let pendingVideo = null, pendingCover = null, videoURLs = {};
 
 function showError(msg) { const el = document.getElementById('errorMsg'); el.textContent = msg; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 3000); }
 function showLogin() { document.getElementById('loginOverlay').classList.remove('hidden'); }
-async function handleLogin() {
-    const name = document.getElementById('loginName').value.trim(), pass = document.getElementById('loginPass').value.trim();
-    if (!name || !pass) { showError('Введи имя и пароль!'); return; }
-    await openDB(); const user = await getUser(name);
-    if (!user || user.pass !== pass) { showError('Неверные данные!'); return; }
-    currentUser = { name, email: user.email }; enterApp();
-}
-async function handleRegister() {
-    const name = document.getElementById('loginName').value.trim(), email = document.getElementById('loginEmail').value.trim(), pass = document.getElementById('loginPass').value.trim();
-    if (!name || !pass) { showError('Введи имя и пароль!'); return; }
-    if (name.length < 2) { showError('Имя от 2 символов!'); return; }
-    await openDB(); if (await getUser(name)) { showError('Имя занято!'); return; }
-    await saveUser({ name, email, pass, created: Date.now() });
-    currentUser = { name, email }; alert('Аккаунт создан!'); enterApp();
-}
+async function handleLogin() { const name = document.getElementById('loginName').value.trim(), pass = document.getElementById('loginPass').value.trim(); if (!name || !pass) { showError('Введи имя и пароль!'); return; } await openDB(); const user = await getUser(name); if (!user || user.pass !== pass) { showError('Неверные данные!'); return; } currentUser = { name, email: user.email }; enterApp(); }
+async function handleRegister() { const name = document.getElementById('loginName').value.trim(), email = document.getElementById('loginEmail').value.trim(), pass = document.getElementById('loginPass').value.trim(); if (!name || !pass) { showError('Введи имя и пароль!'); return; } if (name.length < 2) { showError('Имя от 2 символов!'); return; } await openDB(); if (await getUser(name)) { showError('Имя занято!'); return; } await saveUser({ name, email, pass, created: Date.now() }); currentUser = { name, email }; alert('Аккаунт создан!'); enterApp(); }
 function loginAsGuest() { currentUser = null; enterApp(); }
 function logout() { Object.values(videoURLs).forEach(u => URL.revokeObjectURL(u)); videoURLs = {}; currentUser = null; updateUI(); document.getElementById('loginOverlay').classList.remove('hidden'); }
 function enterApp() { document.getElementById('loginOverlay').classList.add('hidden'); ['loginName','loginEmail','loginPass'].forEach(id => document.getElementById(id).value = ''); document.getElementById('errorMsg').style.display = 'none'; updateUI(); loadVideos(); }
-function updateUI() {
-    const g = !currentUser;
-    document.getElementById('headerUserName').textContent = currentUser?.name || 'Гость';
-    document.getElementById('headerAvatar').textContent = currentUser ? currentUser.name.charAt(0).toUpperCase() : '👁';
-    document.getElementById('headerAvatar').style.background = currentUser ? 'var(--accent)' : '#555';
-    document.getElementById('headerLoginBtn').style.display = g ? 'inline-block' : 'none';
-    document.getElementById('headerLogoutBtn').style.display = g ? 'none' : 'inline-block';
-    document.getElementById('uploadBtn').style.display = g ? 'none' : 'inline-block';
-    document.getElementById('guestBanner').classList.toggle('show', g);
-    renderVideos();
-}
+function updateUI() { const g = !currentUser; document.getElementById('headerUserName').textContent = currentUser?.name || 'Гость'; document.getElementById('headerAvatar').textContent = currentUser ? currentUser.name.charAt(0).toUpperCase() : '👁'; document.getElementById('headerAvatar').style.background = currentUser ? 'var(--accent)' : '#555'; document.getElementById('headerLoginBtn').style.display = g ? 'inline-block' : 'none'; document.getElementById('headerLogoutBtn').style.display = g ? 'none' : 'inline-block'; document.getElementById('uploadBtn').style.display = g ? 'none' : 'inline-block'; document.getElementById('guestBanner').classList.toggle('show', g); renderVideos(); }
 
 function startUpload() { if (!currentUser) return showLogin(); document.getElementById('uploadSection').classList.add('show'); }
 function toggleShortMode() { const s = document.getElementById('isShort').checked; ['coverLabel','coverBtn'].forEach(id => document.getElementById(id).style.display = s ? 'none' : 'inline'); if (s) pendingCover = null; }
-function handleFile(type) {
-    if (!currentUser) return;
-    const input = document.getElementById(type === 'video' ? 'videoFile' : 'coverFile'), file = input.files[0];
-    if (!file) return;
-    if (type === 'video') { pendingVideo = file; document.getElementById('videoLabel').textContent = '🎥 ' + file.name.substring(0, 16); }
-    else { const reader = new FileReader(); reader.onload = e => { pendingCover = e.target.result; document.getElementById('coverLabel').textContent = '🖼 Готово'; }; reader.readAsDataURL(file); }
-}
-async function uploadVideo() {
-    if (!currentUser) return;
-    const title = document.getElementById('videoTitle').value.trim() || 'Без названия', isShort = document.getElementById('isShort').checked;
-    if (!pendingVideo) return alert('Выбери видео!');
-    if (isShort) { const dur = await new Promise(r => { const v = document.createElement('video'); v.preload = 'metadata'; v.onloadedmetadata = () => r(v.duration); v.src = URL.createObjectURL(pendingVideo); }); if (dur > 60) return alert('Shorts до 1 мин!'); }
-    const url = URL.createObjectURL(pendingVideo);
-    const video = { id: Date.now().toString(), title, cover: isShort ? null : (pendingCover || null), isShort, isUltra: false, likes: 0, likedBy: [], views: 0, comments: [], author: currentUser.name, date: new Date().toLocaleDateString('ru-RU') };
-    await saveVideoFull(video, pendingVideo); videos.unshift({...video, url}); videoURLs[video.id] = url; renderVideos(); cancelUpload();
-}
-function cancelUpload() { document.getElementById('uploadSection').classList.remove('show'); ['videoTitle','videoFile','coverFile'].forEach(id => document.getElementById(id).value = ''); document.getElementById('isShort').checked = false; ['videoLabel','coverLabel'].forEach(id => document.getElementById(id).textContent = id === 'videoLabel' ? '🎥 Видео' : '🖼 Обложка'); ['coverLabel','coverBtn'].forEach(id => document.getElementById(id).style.display = 'inline'); pendingVideo = null; pendingCover = null; }
+function handleFile(type) { if (!currentUser) return; const input = document.getElementById(type==='video'?'videoFile':'coverFile'), file = input.files[0]; if (!file) return; if (type==='video') { pendingVideo = file; document.getElementById('videoLabel').textContent = '🎥 ' + file.name.substring(0, 16); } else { const reader = new FileReader(); reader.onload = e => { pendingCover = e.target.result; document.getElementById('coverLabel').textContent = '🖼 Готово'; }; reader.readAsDataURL(file); } }
+async function uploadVideo() { if (!currentUser) return; const title = document.getElementById('videoTitle').value.trim() || 'Без названия', isShort = document.getElementById('isShort').checked; if (!pendingVideo) return alert('Выбери видео!'); if (isShort) { const dur = await new Promise(r => { const v = document.createElement('video'); v.preload = 'metadata'; v.onloadedmetadata = () => r(v.duration); v.src = URL.createObjectURL(pendingVideo); }); if (dur > 60) return alert('Shorts до 1 мин!'); } const url = URL.createObjectURL(pendingVideo); const video = { id: Date.now().toString(), title, cover: isShort ? null : (pendingCover || null), isShort, isUltra: false, likes: 0, likedBy: [], views: 0, comments: [], author: currentUser.name, date: new Date().toLocaleDateString('ru-RU') }; await saveVideoFull(video, pendingVideo); videos.unshift({...video, url}); videoURLs[video.id] = url; renderVideos(); cancelUpload(); }
+function cancelUpload() { document.getElementById('uploadSection').classList.remove('show'); ['videoTitle','videoFile','coverFile'].forEach(id => document.getElementById(id).value = ''); document.getElementById('isShort').checked = false; ['videoLabel','coverLabel'].forEach(id => document.getElementById(id).textContent = id==='videoLabel'?'🎥 Видео':'🖼 Обложка'); ['coverLabel','coverBtn'].forEach(id => document.getElementById(id).style.display = 'inline'); pendingVideo = null; pendingCover = null; }
 
 async function loadVideos() { await openDB(); const records = await getAllVideos(); videos = records.map(r => { if (r.blob) { const url = URL.createObjectURL(r.blob); videoURLs[r.id] = url; return {...r, url}; } if (r.url) videoURLs[r.id] = r.url; return r; }); renderVideos(); }
 function switchTab(tab) { currentTab = tab; document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); event.target.classList.add('active'); renderVideos(); }
-function renderVideos() {
-    const grid = document.getElementById('videoGrid'), query = (document.getElementById('searchInput')?.value || '').toLowerCase();
-    let filtered = videos;
-    if (currentTab === 'shorts') filtered = videos.filter(v => v.isShort); else if (currentTab === 'ultra') filtered = videos.filter(v => v.isUltra);
-    if (query) filtered = filtered.filter(v => v.title.toLowerCase().includes(query));
-    if (filtered.length === 0) { grid.innerHTML = `<div class="empty"><div class="icon">🎥</div><div>${query?'Ничего не найдено':'Видео пока нет'}</div></div>`; return; }
-    const shorts = currentTab === 'all' ? filtered.filter(v => v.isShort) : [], regular = currentTab === 'all' ? filtered.filter(v => !v.isShort) : filtered;
-    let html = '';
-    if (shorts.length > 0 && currentTab === 'all') { html += '<div class="section-title">⚡ Shorts</div><div class="shorts-grid" style="grid-column:1/-1;">' + shorts.map(cardHTML).join('') + '</div>'; }
-    if (regular.length > 0 || currentTab !== 'all') { if (currentTab === 'all' && shorts.length > 0) html += '<div class="section-title">🎥 Видео</div>'; (currentTab === 'all' ? regular : filtered).forEach(v => html += cardHTML(v)); }
-    grid.style.gridTemplateColumns = currentTab === 'shorts' ? 'repeat(auto-fill, minmax(180px, 1fr))' : 'repeat(auto-fill, minmax(280px, 1fr))';
-    grid.innerHTML = html;
-}
+function renderVideos() { const grid = document.getElementById('videoGrid'), query = (document.getElementById('searchInput')?.value || '').toLowerCase(); let filtered = videos; if (currentTab==='shorts') filtered = videos.filter(v => v.isShort); else if (currentTab==='ultra') filtered = videos.filter(v => v.isUltra); if (query) filtered = filtered.filter(v => v.title.toLowerCase().includes(query)); if (filtered.length === 0) { grid.innerHTML = `<div class="empty"><div class="icon">🎥</div><div>${query?'Ничего не найдено':'Видео пока нет'}</div></div>`; return; } const shorts = currentTab==='all' ? filtered.filter(v => v.isShort) : [], regular = currentTab==='all' ? filtered.filter(v => !v.isShort) : filtered; let html = ''; if (shorts.length > 0 && currentTab==='all') { html += '<div class="section-title">⚡ Shorts</div><div class="shorts-grid" style="grid-column:1/-1;">' + shorts.map(cardHTML).join('') + '</div>'; } if (regular.length > 0 || currentTab!=='all') { if (currentTab==='all' && shorts.length > 0) html += '<div class="section-title">🎥 Видео</div>'; (currentTab==='all'?regular:filtered).forEach(v => html += cardHTML(v)); } grid.style.gridTemplateColumns = currentTab==='shorts'?'repeat(auto-fill, minmax(180px, 1fr))':'repeat(auto-fill, minmax(280px, 1fr))'; grid.innerHTML = html; }
 function cardHTML(v) { const g = !currentUser, liked = currentUser && v.likedBy?.includes(currentUser.name), badge = v.isUltra ? '<div class="video-badge badge-ultra">⚡УЛЬТРА</div>' : (v.isShort ? '<div class="video-badge badge-short">⚡Short</div>' : ''); return `<div class="video-card ${v.isUltra?'ultra':''}" onclick="openPlayer('${v.id}')"><div class="video-thumb ${v.isShort?'short-thumb':''}">${v.cover?`<img src="${v.cover}">`:'🎬'}${badge}<div class="play-icon">▶️</div></div><div class="video-info"><div class="video-title">${v.title}</div><div class="video-meta"><span>👁 ${v.views} • ${v.date}</span><button class="hit-btn ${liked?'liked':''} ${g?'disabled':''}" onclick="event.stopPropagation();${g?'showLogin()':`toggleLike('${v.id}')`}">🤟 <span class="hit-count">${v.likes}</span></button></div></div></div>`; }
 
-function openPlayer(id) { const v = videos.find(x => x.id === id); if (!v) return; currentVideoId = id; v.views++; updateVideo(v); document.getElementById('playerOverlay').classList.add('active'); document.getElementById('playerVideo').src = videoURLs[id] || v.url; document.getElementById('playerTitle').textContent = v.title; document.getElementById('playerViews').textContent = v.views; document.getElementById('playerHitCount').textContent = v.likes; const liked = currentUser && v.likedBy?.includes(currentUser.name); document.getElementById('playerHit').classList.toggle('liked', liked); document.getElementById('playerHit').classList.toggle('disabled', !currentUser); document.getElementById('playerUltra').textContent = v.isUltra ? '🔋 Разрядить' : '⚡ Ультра'; document.getElementById('playerUltra').style.display = currentUser ? 'inline-block' : 'none'; document.getElementById('playerVideo').play(); renderComments(); renderVideos(); }
+function openPlayer(id) {
+    const v = videos.find(x => x.id === id); if (!v) return;
+    currentVideoId = id; v.views++; updateVideo(v);
+    document.getElementById('playerOverlay').classList.add('active');
+    document.getElementById('playerTitle').textContent = v.title;
+    document.getElementById('playerViews').textContent = v.views;
+    document.getElementById('playerHitCount').textContent = v.likes;
+    const liked = currentUser && v.likedBy?.includes(currentUser.name);
+    document.getElementById('playerHit').classList.toggle('liked', liked);
+    document.getElementById('playerHit').classList.toggle('disabled', !currentUser);
+    document.getElementById('playerUltra').textContent = v.isUltra ? '🔋 Разрядить' : '⚡ Ультра';
+    document.getElementById('playerUltra').style.display = currentUser ? 'inline-block' : 'none';
+    const videoEl = document.getElementById('playerVideo');
+    videoEl.onerror = function() {
+        const code = videoEl.error ? videoEl.error.code : '?';
+        const msgs = {1:'ОШИБКА 1: Видео прервано',2:'ОШИБКА 2: Сетевая ошибка',3:'ОШИБКА 3: Видео повреждено',4:'ОШИБКА 404: Видео не найдено'};
+        document.getElementById('playerTitle').textContent = '⚠️ ' + (msgs[code] || 'ОШИБКА '+code+': Видео недоступно');
+    };
+    videoEl.onloadeddata = () => { document.getElementById('playerTitle').textContent = v.title; };
+    videoEl.src = videoURLs[id] || v.url;
+    videoEl.play().catch(()=>{});
+    renderComments(); renderVideos();
+}
 function closePlayer() { document.getElementById('playerOverlay').classList.remove('active'); document.getElementById('playerVideo').pause(); document.getElementById('playerVideo').src = ''; currentVideoId = null; renderVideos(); }
 function toggleLike(id) { if (!currentUser) return showLogin(); const v = videos.find(x => x.id === id); if (!v) return; if (!v.likedBy) v.likedBy = []; v.likedBy.includes(currentUser.name) ? (v.likes--, v.likedBy = v.likedBy.filter(n => n !== currentUser.name)) : (v.likes++, v.likedBy.push(currentUser.name)); updateVideo(v); renderVideos(); if (currentVideoId === id) { document.getElementById('playerHitCount').textContent = v.likes; document.getElementById('playerHit').classList.toggle('liked', v.likedBy.includes(currentUser.name)); } }
 function toggleUltra(id) { if (!currentUser) return showLogin(); const v = videos.find(x => x.id === id); if (!v) return; v.isUltra = !v.isUltra; updateVideo(v); renderVideos(); if (currentVideoId === id) document.getElementById('playerUltra').textContent = v.isUltra ? '🔋 Разрядить' : '⚡ Ультра'; }
